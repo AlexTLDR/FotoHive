@@ -15,7 +15,22 @@ func contactHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "<h1>Contact Page</h1><p>To get in touch, please send an email to <a href=\"mailto:webdev@gmail.com\">webdev@gmail.com</a>.</p>")
 }
 
-func pathHandler(w http.ResponseWriter, r *http.Request) {
+// func pathHandler(w http.ResponseWriter, r *http.Request) {
+// 	switch r.URL.Path {
+// 	case "/":
+// 		homeHandler(w, r)
+// 	case "/contact":
+// 		contactHandler(w, r)
+// 	default:
+// 		// w.WriteHeader(http.StatusNotFound)
+// 		// fmt.Fprintf(w, "<h1>404 Page Not Found</h1>")
+// 		http.Error(w, "404 Page Not Found", http.StatusNotFound)
+// 	}
+// }
+
+type Router struct{}
+
+func (router Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case "/":
 		homeHandler(w, r)
@@ -29,8 +44,7 @@ func pathHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/", pathHandler)
-	http.HandleFunc("/contact", contactHandler)
+	var router Router
 	fmt.Println("Server is running on port 3000")
-	http.ListenAndServe(":3000", nil)
+	http.ListenAndServe(":3000", router)
 }
