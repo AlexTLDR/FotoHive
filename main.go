@@ -10,6 +10,7 @@ import (
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	fmt.Fprintf(w, "<h1>Welcome to my awesome site!</h1>")
+	fmt.Fprint(w, `<script>alert("This is a bio")</script>`)
 }
 
 func contactHandler(w http.ResponseWriter, r *http.Request) {
