@@ -26,24 +26,20 @@ func executeTemplate(w http.ResponseWriter, filepath string) {
 	}
 }
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	// tpl, err := template.ParseFiles("templates/home.gohtml") -> this is only working in unix systems
 	tplPath := filepath.Join("templates", "home.gohtml")
 	executeTemplate(w, tplPath)
 }
 
 func contactHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	// tpl, err := template.ParseFiles("templates/contact.gohtml") -> this is only working in unix systems
 	tplPath := filepath.Join("templates", "contact.gohtml")
 	executeTemplate(w, tplPath)
 }
 
 func faqHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	fmt.Fprint(w, "<h1>Is there a free version?</h1><p>Yes!We offer free trial for 30 days.</p>",
-		"<h1>What are your support hours?</h1><p>Non-Stop.</p>",
-		"<h1>How do I cancel?</h1><p>You can cancel anytime in your account settings.</p>")
+	tplPath := filepath.Join("templates", "faq.gohtml")
+	executeTemplate(w, tplPath)
 }
 
 func main() {
