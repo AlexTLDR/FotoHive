@@ -1,54 +1,11 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>FAQ</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-    }
+<h1>FAQ Page</h1>
+<ul>
+  {{range .}}
+    {{template "qa" .}}
+  {{end}}
+</ul>
 
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-
-    .question {
-      margin-bottom: 10px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .answer {
-      margin-bottom: 20px;
-      display: none;
-    }
-  </style>
-  <script>
-    function toggleAnswer(id) {
-      var answer = document.getElementById(id);
-      if (answer.style.display === "none") {
-        answer.style.display = "block";
-      } else {
-        answer.style.display = "none";
-      }
-    }
-  </script>
-</head>
-<body>
-  <div class="container">
-    <h1>Frequently Asked Questions</h1>
-    <div class="question" onclick="toggleAnswer('answer1')">Q: What is the purpose of this website?</div>
-    <div class="answer" id="answer1">A: The purpose of this website is to provide information about our products and services.</div>
-    
-    <div class="question" onclick="toggleAnswer('answer2')">Q: How can I contact customer support?</div>
-    <div class="answer" id="answer2">A: You can contact our customer support team by phone at +123456789 or by email at support@example.com.</div>
-    
-    <div class="question" onclick="toggleAnswer('answer3')">Q: Do you offer refunds?</div>
-    <div class="answer" id="answer3">A: Yes, we offer a 30-day money-back guarantee. If you're not satisfied with your purchase, please contact our support team for a refund.</div>
-    
-    <div class="question" onclick="toggleAnswer('answer4')">Q: How long does shipping take?</div>
-    <div class="answer" id="answer4">A: Shipping times vary depending on your location. Typically, orders are delivered within 3-5 business days.</div>
-  </div>
-</body>
-</html>
+{{define "qa"}}
+  <li>
+    <b>{{.Question}}</b> {{.Answer}}</li>
+{{end}}
