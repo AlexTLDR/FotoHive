@@ -11,3 +11,5 @@ Env:
       POSTGRES_DB: GalacticFederation
 Adminer:
     localhost:3333
+PSQL:
+    docker compose exec -it db psql -U rick -d GalacticFederation
