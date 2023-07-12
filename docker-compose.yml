@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+# Postgres
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: rick
+      POSTGRES_PASSWORD: picklerick
+      POSTGRES_DB: GalacticFederation
+    ports:
+      - 5432:5432
+
+  # Adminer
+  adminer:
+    image: adminer
+    restart: always
+    environment:
+      ADMINER_DESIGN: dracula
+    ports:
+      - 3333:8080
