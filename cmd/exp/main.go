@@ -1,30 +1,21 @@
 package main
 
 import (
-	"html/template"
-	"os"
+	"database/sql"
+	"fmt"
+
+	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
-type User struct {
-	Name string
-	Bio  string
-	Age  int
-}
-
 func main() {
-	t, err := template.ParseFiles("hello.gohtml")
+	db, err := sql.Open("pgx", "host=localhost port=5432 user=rick password=picklerick dbname=GalacticFederation sslmode=disable")
 	if err != nil {
 		panic(err)
 	}
-
-	user := User{
-		Name: "John Doe",
-		Bio:  `<script>alert("This is a bio")</script>`,
-		Age:  69,
-	}
-
-	err = t.Execute(os.Stdout, user)
+	defer db.Close()
+	err = db.Ping()
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println("Connected to database!")
 }
