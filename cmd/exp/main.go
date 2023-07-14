@@ -62,13 +62,16 @@ func main() {
 	fmt.Println("Table created successfully!")
 
 	// Insert some data
-	name := "Rick Sanchez"
-	email := "rick@pickle.org"
-	_, err = db.Exec(`
+	name := "Morty"
+	email := "morty@pickle.org"
+	row := db.QueryRow(`
 		INSERT INTO users (name, email)
-		VALUES ($1, $2);`, name, email)
+		VALUES ($1, $2) RETURNING id;`, name, email)
+	//row.Err()
+	var id int
+	err = row.Scan(&id)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("User inserted successfully!")
+	fmt.Println("User inserted successfully, with id:", id, "!")
 }
