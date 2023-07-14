@@ -90,4 +90,17 @@ func main() {
 		panic(err)
 	}
 	fmt.Println("User:", name, "with email:", email)
+
+	userID := 1
+	for i := 1; i < 5; i++ {
+		amount := 100 * i
+		description := fmt.Sprintf("Order #%d", i)
+		_, err = db.Exec(`
+			INSERT INTO orders (user_id, amount, description)
+			VALUES ($1, $2, $3);`, userID, amount, description)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("Order inserted successfully!")
+	}
 }
