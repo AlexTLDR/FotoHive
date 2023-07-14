@@ -92,15 +92,44 @@ func main() {
 	fmt.Println("User:", name, "with email:", email)
 
 	userID := 1
-	for i := 1; i < 5; i++ {
-		amount := 100 * i
-		description := fmt.Sprintf("Order #%d", i)
-		_, err = db.Exec(`
-			INSERT INTO orders (user_id, amount, description)
-			VALUES ($1, $2, $3);`, userID, amount, description)
+	// for i := 1; i < 5; i++ {
+	// 	amount := 100 * i
+	// 	description := fmt.Sprintf("Order #%d", i)
+	// 	_, err = db.Exec(`
+	// 		INSERT INTO orders (user_id, amount, description)
+	// 		VALUES ($1, $2, $3);`, userID, amount, description)
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
+	// 	fmt.Println("Order inserted successfully!")
+	// }
+
+	type Order struct {
+		ID          int
+		UserID      int
+		Amount      int
+		Description string
+	}
+	var orders []Order
+	rows, err := db.Query(`
+			SELECT id, amount, description
+			FROM orders
+			WHERE user_id=$1;`, userID)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var order Order
+		order.UserID = userID
+		err = rows.Scan(&order.ID, &order.Amount, &order.Description)
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println("Order inserted successfully!")
+		orders = append(orders, order)
 	}
+	if err = rows.Err(); err != nil {
+		panic(err)
+	}
+	fmt.Println("Orders:", orders)
 }
