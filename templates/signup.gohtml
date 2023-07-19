@@ -5,6 +5,9 @@
             Sign Up Now!
         </h1>
         <form action="/users" method="post">
+            <div class ="hidden">
+              {{.CSRFField}}
+            </div>
             <div class="py-2">
                 <label for="email" class="text-sm font-semibold text-gray-800">Email Address</label>
                 <input name="email" id="email" type="email" placeholder="Email Address" required autocomplete="email"
