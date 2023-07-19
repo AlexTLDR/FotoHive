@@ -58,9 +58,10 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	cookie := http.Cookie{
-		Name:  "email",
-		Value: user.Email,
-		Path:  "/",
+		Name:     "email",
+		Value:    user.Email,
+		Path:     "/",
+		HttpOnly: true,
 	}
 	http.SetCookie(w, &cookie)
 	fmt.Fprintf(w, "User authenticated: %+v", user)
