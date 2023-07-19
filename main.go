@@ -9,6 +9,7 @@ import (
 	"github.com/AlexTLDR/WebDev/templates"
 	"github.com/AlexTLDR/WebDev/views"
 	"github.com/go-chi/chi/v5"
+	"github.com/gorilla/csrf"
 )
 
 func main() {
@@ -46,5 +47,7 @@ func main() {
 		http.Error(w, "404 Page Not Found", http.StatusNotFound)
 	})
 	fmt.Println("Server is running on port 3000")
-	http.ListenAndServe(":3000", r)
+	csrfKey := "0An3m5VpO8cnA9LTe60RQcmmyJwhj3f5"
+	csrfMw := csrf.Protect([]byte(csrfKey), csrf.Secure(false)) //TODO: change to true in production
+	http.ListenAndServe(":3000", csrfMw(r))
 }
