@@ -31,9 +31,13 @@ func main() {
 	userService := models.UserService{
 		DB: db,
 	}
+	sessionService := models.SessionService{
+		DB: db,
+	}
 
 	usersC := controllers.Users{
-		UserService: &userService,
+		UserService:    &userService,
+		SessionService: &sessionService,
 	}
 	usersC.Templates.New = views.Must(views.ParseFS(templates.FS, "signup.gohtml", "tailwind.gohtml"))
 	usersC.Templates.SignIn = views.Must(views.ParseFS(templates.FS, "signin.gohtml", "tailwind.gohtml"))
