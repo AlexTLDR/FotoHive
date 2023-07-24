@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/AlexTLDR/WebDev/controllers"
+	"github.com/AlexTLDR/WebDev/migrations"
 	"github.com/AlexTLDR/WebDev/models"
 	"github.com/AlexTLDR/WebDev/templates"
 	"github.com/AlexTLDR/WebDev/views"
@@ -28,7 +29,7 @@ func main() {
 	}
 	defer db.Close()
 
-	err = models.Migrate(db, "migrations")
+	err = models.MigrateFS(db, migrations.FS, ".")
 	if err != nil {
 		panic(err)
 	}
