@@ -9,6 +9,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/AlexTLDR/WebDev/context"
+	"github.com/AlexTLDR/WebDev/models"
 	"github.com/gorilla/csrf"
 )
 
@@ -25,6 +27,9 @@ func ParseFS(fs fs.FS, patterns ...string) (Template, error) {
 		template.FuncMap{
 			"csrfField": func() (template.HTML, error) {
 				return "", fmt.Errorf("csrfField not implemented")
+			},
+			"currentUser": func() (template.HTML, error) {
+				return "", fmt.Errorf("currentUser not implemented")
 			},
 		},
 	)
@@ -64,6 +69,9 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface
 		template.FuncMap{
 			"csrfField": func() template.HTML {
 				return csrf.TemplateField(r)
+			},
+			"currentUser": func() *models.User {
+				return context.User(r.Context())
 			},
 		},
 	)
