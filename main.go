@@ -57,7 +57,8 @@ func main() {
 	// Routes
 
 	r := chi.NewRouter()
-
+	r.Use(csrfMw)
+	r.Use(umw.SetUser)
 	r.Get("/", controllers.StaticHandler(views.Must(views.ParseFS(templates.FS, "home.gohtml", "tailwind.gohtml"))))
 	r.Get("/contact", controllers.StaticHandler(views.Must(views.ParseFS(templates.FS, "contact.gohtml", "tailwind.gohtml"))))
 	r.Get("/faq", controllers.FAQ(views.Must(views.ParseFS(templates.FS, "faq.gohtml", "tailwind.gohtml"))))
@@ -74,5 +75,5 @@ func main() {
 	// Start the server
 
 	fmt.Println("Server is running on port 3000")
-	http.ListenAndServe(":3000", csrfMw(umw.SetUser(r)))
+	http.ListenAndServe(":3000", r)
 }
