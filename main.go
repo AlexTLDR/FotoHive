@@ -14,13 +14,7 @@ import (
 )
 
 func main() {
-	r := chi.NewRouter()
-
-	r.Get("/", controllers.StaticHandler(views.Must(views.ParseFS(templates.FS, "home.gohtml", "tailwind.gohtml"))))
-
-	r.Get("/contact", controllers.StaticHandler(views.Must(views.ParseFS(templates.FS, "contact.gohtml", "tailwind.gohtml"))))
-
-	r.Get("/faq", controllers.FAQ(views.Must(views.ParseFS(templates.FS, "faq.gohtml", "tailwind.gohtml"))))
+	// DB setup
 
 	cfg := models.DefaultPostgresConfig()
 	db, err := models.Open(cfg)
@@ -33,6 +27,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	// Services
+
 	userService := models.UserService{
 		DB: db,
 	}
@@ -40,29 +37,42 @@ func main() {
 		DB: db,
 	}
 
+	// Middleware
+
+	csrfKey := "0An3m5VpO8cnA9LTe60RQcmmyJwhj3f5"
+	csrfMw := csrf.Protect([]byte(csrfKey), csrf.Secure(false)) //TODO: change to true in production
+
+	// Contollers
+
 	usersC := controllers.Users{
 		UserService:    &userService,
 		SessionService: &sessionService,
 	}
 	usersC.Templates.New = views.Must(views.ParseFS(templates.FS, "signup.gohtml", "tailwind.gohtml"))
 	usersC.Templates.SignIn = views.Must(views.ParseFS(templates.FS, "signin.gohtml", "tailwind.gohtml"))
+	umw := controllers.UserMiddleware{
+		SessionService: &sessionService,
+	}
+
+	// Routes
+
+	r := chi.NewRouter()
+
+	r.Get("/", controllers.StaticHandler(views.Must(views.ParseFS(templates.FS, "home.gohtml", "tailwind.gohtml"))))
+	r.Get("/contact", controllers.StaticHandler(views.Must(views.ParseFS(templates.FS, "contact.gohtml", "tailwind.gohtml"))))
+	r.Get("/faq", controllers.FAQ(views.Must(views.ParseFS(templates.FS, "faq.gohtml", "tailwind.gohtml"))))
 	r.Get("/signup", usersC.New)
 	r.Post("/users", usersC.Create)
 	r.Get("/signin", usersC.SignIn)
 	r.Post("/signin", usersC.ProcessSignIn)
 	r.Post("/signout", usersC.ProcessSignOut)
 	r.Get("/users/me", usersC.CurrentUser)
-
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "404 Page Not Found", http.StatusNotFound)
 	})
 
-	umw := controllers.UserMiddleware{
-		SessionService: &sessionService,
-	}
+	// Start the server
 
-	csrfKey := "0An3m5VpO8cnA9LTe60RQcmmyJwhj3f5"
-	csrfMw := csrf.Protect([]byte(csrfKey), csrf.Secure(false)) //TODO: change to true in production
 	fmt.Println("Server is running on port 3000")
 	http.ListenAndServe(":3000", csrfMw(umw.SetUser(r)))
 }
