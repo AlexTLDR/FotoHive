@@ -5,6 +5,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"strings"
 )
 
 type key string
@@ -17,9 +18,8 @@ func main() {
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, favoriteColorKey, "dark-red")
 
-	ctx = context.WithValue(ctx, "favorite-color", 123)
-
 	value := ctx.Value(favoriteColorKey)
-	value2 := ctx.Value("favorite-color")
-	fmt.Println(value, value2)
+	strValue := value.(string)
+	fmt.Println(strValue)
+	fmt.Println(strings.HasPrefix(strValue, "dark"))
 }
