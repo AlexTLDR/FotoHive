@@ -3,9 +3,11 @@
 package main
 
 import (
-	"context"
+	standardCtx "context"
 	"fmt"
-	"strings"
+
+	"github.com/AlexTLDR/WebDev/context"
+	"github.com/AlexTLDR/WebDev/models"
 )
 
 type key string
@@ -15,11 +17,13 @@ const (
 )
 
 func main() {
-	ctx := context.Background()
-	ctx = context.WithValue(ctx, favoriteColorKey, "dark-red")
+	ctx := standardCtx.Background()
 
-	value := ctx.Value(favoriteColorKey)
-	strValue := value.(string)
-	fmt.Println(strValue)
-	fmt.Println(strings.HasPrefix(strValue, "dark"))
+	user := models.User{
+		Email: "alex@alex.com",
+	}
+	ctx = context.WithUser(ctx, &user)
+
+	retrievedUser := context.User(ctx)
+	fmt.Println(retrievedUser.Email)
 }
