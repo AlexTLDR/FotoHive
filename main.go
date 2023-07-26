@@ -67,7 +67,11 @@ func main() {
 	r.Get("/signin", usersC.SignIn)
 	r.Post("/signin", usersC.ProcessSignIn)
 	r.Post("/signout", usersC.ProcessSignOut)
-	r.Get("/users/me", usersC.CurrentUser)
+	r.Route("/users/me", func(r chi.Router) {
+		r.Use(umw.RequireUser)
+		r.Get("/", usersC.CurrentUser)
+	})
+	//r.Get("/users/me", usersC.CurrentUser)
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "404 Page Not Found", http.StatusNotFound)
 	})
