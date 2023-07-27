@@ -3,27 +3,23 @@
 package main
 
 import (
-	standardCtx "context"
-	"fmt"
+	"os"
 
-	"github.com/AlexTLDR/WebDev/context"
-	"github.com/AlexTLDR/WebDev/models"
-)
-
-type key string
-
-const (
-	favoriteColorKey key = "favorite-color"
+	"github.com/go-mail/mail/v2"
 )
 
 func main() {
-	ctx := standardCtx.Background()
+	from := "alex@alex.com"
+	to := "alex@tldr.com"
+	subject := "hello"
+	plaintext := "hello world from the email body"
+	html := "<h1>Hello World</h1><p>hello world from the email body</p><p>more text</p>"
 
-	user := models.User{
-		Email: "alex@alex.com",
-	}
-	ctx = context.WithUser(ctx, &user)
-
-	retrievedUser := context.User(ctx)
-	fmt.Println(retrievedUser.Email)
+	msg := mail.NewMessage()
+	msg.SetHeader("From", from)
+	msg.SetHeader("To", to)
+	msg.SetHeader("Subject", subject)
+	msg.SetBody("text/plain", plaintext)
+	msg.AddAlternative("text/html", html)
+	msg.WriteTo(os.Stdout)
 }
