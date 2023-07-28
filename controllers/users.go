@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 
 	"github.com/AlexTLDR/WebDev/context"
 	"github.com/AlexTLDR/WebDev/models"
@@ -11,11 +12,15 @@ import (
 
 type Users struct {
 	Templates struct {
-		New    Template
-		SignIn Template
+		New            Template
+		SignIn         Template
+		ForgotPassword Template
+		CheckYourEmail Template
 	}
-	UserService    *models.UserService
-	SessionService *models.SessionService
+	UserService          *models.UserService
+	SessionService       *models.SessionService
+	PasswordResetService *models.PasswordResetService
+	EmailService         *models.EmailService
 }
 
 func (u Users) New(w http.ResponseWriter, r *http.Request) {
@@ -95,6 +100,41 @@ func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
 	}
 	deleteCookie(w, CookieSession)
 	http.Redirect(w, r, "/signin", http.StatusFound)
+}
+
+func (u Users) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+	var data struct {
+		Email string
+	}
+	data.Email = r.FormValue("email")
+	u.Templates.ForgotPassword.Execute(w, r, data)
+}
+
+func (u Users) ProcessForgotPassword(w http.ResponseWriter, r *http.Request) {
+	var data struct {
+		Email string
+	}
+	data.Email = r.FormValue("email")
+	pwReset, err := u.PasswordResetService.Create(data.Email)
+	if err != nil {
+		// TODO: better error handling, like a user does not exist with that email address
+		log.Println(err)
+		http.Error(w, "Something went wrong. Please try again later.", http.StatusInternalServerError)
+		return
+	}
+	vals := url.Values{
+		"token": {pwReset.Token},
+	}
+	resetURL := "https://www.alextldr.com/reset-password?" + vals.Encode()
+	err = u.EmailService.ForgotPassword(data.Email, resetURL)
+	if err != nil {
+		// TODO: better error handling, like a user does not exist with that email address
+		log.Println(err)
+		http.Error(w, "Something went wrong. Please try again later.", http.StatusInternalServerError)
+		return
+	}
+	// Don't render the reset token here. The user should have access to his email. This way the identity is verified.
+	u.Templates.CheckYourEmail.Execute(w, r, data)
 }
 
 type UserMiddleware struct {
