@@ -126,7 +126,7 @@ func (u Users) ProcessForgotPassword(w http.ResponseWriter, r *http.Request) {
 	vals := url.Values{
 		"token": {pwReset.Token},
 	}
-	resetURL := "https://www.alextldr.com/reset-password?" + vals.Encode()
+	resetURL := "https://www.alextldr.com/reset-pw?" + vals.Encode()
 	err = u.EmailService.ForgotPassword(data.Email, resetURL)
 	if err != nil {
 		// TODO: better error handling, like a user does not exist with that email address
