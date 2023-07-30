@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
+	"strconv"
 
 	"github.com/AlexTLDR/WebDev/controllers"
 	"github.com/AlexTLDR/WebDev/migrations"
@@ -11,13 +13,55 @@ import (
 	"github.com/AlexTLDR/WebDev/views"
 	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/csrf"
+	"github.com/joho/godotenv"
 )
 
-func main() {
-	// DB setup
+type config struct {
+	PSQL models.PostgresConfig
+	SMTP models.SMTPConfig
+	CSRF struct {
+		Key    string
+		Secure bool
+	}
+	Server struct {
+		Address string
+	}
+}
 
-	cfg := models.DefaultPostgresConfig()
-	db, err := models.Open(cfg)
+func loadEnvConfig() (config, error) {
+	var cfg config
+	err := godotenv.Load()
+	if err != nil {
+		return cfg, err
+	}
+	// TODO: PSQL
+	cfg.PSQL = models.DefaultPostgresConfig()
+
+	// TODO: SMTP
+	cfg.SMTP.Host = os.Getenv("SMTP_HOST")
+	portString := os.Getenv("SMTP_PORT")
+	cfg.SMTP.Port, err = strconv.Atoi(portString)
+	if err != nil {
+		return cfg, err
+	}
+	cfg.SMTP.Username = os.Getenv("SMTP_USERNAME")
+	cfg.SMTP.Password = os.Getenv("SMTP_PASSWORD")
+	// TODO: CSRF
+	cfg.CSRF.Key = "0An3m5VpO8cnA9LTe60RQcmmyJwhj3f5"
+	cfg.CSRF.Secure = false //TODO: change to true in production
+	// TODO: Read the server values from env variable
+	cfg.Server.Address = ":3000"
+	return cfg, nil
+
+}
+
+func main() {
+	cfg, err := loadEnvConfig()
+	if err != nil {
+		panic(err)
+	}
+	// DB setup
+	db, err := models.Open(cfg.PSQL)
 	if err != nil {
 		panic(err)
 	}
@@ -30,26 +74,31 @@ func main() {
 
 	// Services
 
-	userService := models.UserService{
+	userService := &models.UserService{
 		DB: db,
 	}
-	sessionService := models.SessionService{
+	sessionService := &models.SessionService{
 		DB: db,
 	}
+	pwResetService := &models.PasswordResetService{
+		DB: db,
+	}
+	emailService := models.NewEmailService(cfg.SMTP)
 
 	// Middleware
 	umw := controllers.UserMiddleware{
-		SessionService: &sessionService,
+		SessionService: sessionService,
 	}
 
-	csrfKey := "0An3m5VpO8cnA9LTe60RQcmmyJwhj3f5"
-	csrfMw := csrf.Protect([]byte(csrfKey), csrf.Secure(false)) //TODO: change to true in production
+	csrfMw := csrf.Protect([]byte(cfg.CSRF.Key), csrf.Secure(cfg.CSRF.Secure))
 
 	// Contollers
 
 	usersC := controllers.Users{
-		UserService:    &userService,
-		SessionService: &sessionService,
+		UserService:          userService,
+		SessionService:       sessionService,
+		PasswordResetService: pwResetService,
+		EmailService:         emailService,
 	}
 	usersC.Templates.New = views.Must(views.ParseFS(templates.FS, "signup.gohtml", "tailwind.gohtml"))
 	usersC.Templates.SignIn = views.Must(views.ParseFS(templates.FS, "signin.gohtml", "tailwind.gohtml"))
@@ -81,6 +130,9 @@ func main() {
 
 	// Start the server
 
-	fmt.Println("Server is running on port 3000")
-	http.ListenAndServe(":3000", r)
+	fmt.Printf("Server is running on port %s...\n", cfg.Server.Address)
+	err = http.ListenAndServe(cfg.Server.Address, r)
+	if err != nil {
+		panic(err)
+	}
 }
