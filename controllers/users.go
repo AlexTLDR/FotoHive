@@ -7,6 +7,7 @@ import (
 	"net/url"
 
 	"github.com/AlexTLDR/WebDev/context"
+	"github.com/AlexTLDR/WebDev/errors"
 	"github.com/AlexTLDR/WebDev/models"
 )
 
@@ -41,6 +42,9 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 	data.Password = r.FormValue("password")
 	user, err := u.UserService.Create(data.Email, data.Password)
 	if err != nil {
+		if errors.Is(err, models.ErrEmailTaken) {
+			err = errors.Public(err, "Email is already taken!")
+		}
 		u.Templates.New.Execute(w, r, data, err)
 		return
 	}
