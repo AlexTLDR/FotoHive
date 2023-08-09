@@ -3,14 +3,18 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/AlexTLDR/WebDev/context"
+	"github.com/AlexTLDR/WebDev/errors"
 	"github.com/AlexTLDR/WebDev/models"
+	"github.com/go-chi/chi/v5"
 )
 
 type Galleries struct {
 	Templates struct {
-		New Template
+		New  Template
+		Edit Template
 	}
 	GalleryService *models.GalleryService
 }
@@ -37,4 +41,33 @@ func (g Galleries) Create(w http.ResponseWriter, r *http.Request) {
 	}
 	editPath := fmt.Sprintf("/galleries/%d/edit", gallery.ID)
 	http.Redirect(w, r, editPath, http.StatusFound)
+}
+
+func (g Galleries) Edit(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusNotFound)
+		return
+	}
+	gallery, err := g.GalleryService.ByID(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNotFound) {
+			http.Error(w, "Gallery not found", http.StatusNotFound)
+			return
+		}
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+	user := context.User(r.Context())
+	if gallery.UserID != user.ID {
+		http.Error(w, "You do not have permission to edit this gallery", http.StatusForbidden)
+		return
+	}
+	var data struct {
+		ID    int
+		Title string
+	}
+	data.ID = gallery.ID
+	data.Title = gallery.Title
+	g.Templates.Edit.Execute(w, r, data)
 }
