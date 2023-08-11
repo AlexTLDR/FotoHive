@@ -16,7 +16,7 @@
             <tr class="border">
                 <td class="p-2 border">{{.ID}}</td>
                 <td class="p-2 border">{{.Title}}</td>
-                <td class="p-2 border">
+                <td class="p-2 border flex space-x-2">
                     <a href="/galleries/{{.ID}}"
                         class="py-1 px-2 bg-blue-100 hover:bg-blue-200
                             border border-blue-600
@@ -26,7 +26,16 @@
                          class="py-1 px-2 bg-yellow-100 hover:bg-yellow-200
                             border border-yellow-600
                             text-xs text-yellow-600
-                            rounded">Edit</a>               
+                            rounded">Edit</a>
+                    <form action="/galleries/{{.ID}}/delete" method="post"
+                        onsubmit="return confirm('Do you really want to delete this gallery?');">
+                        {{csrfField}}
+                        <button type="submit"
+                            class="py-1 px-2 bg-red-100 hover:bg-red-200
+                                border border-red-600
+                                text-xs text-red-600
+                                rounded">Delete</button>  
+                    </form>               
                 </td>
             </tr>
             {{end}}
