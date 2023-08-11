@@ -12,7 +12,17 @@
             </tr>
         </thead>
         <tbody>
-            <!-- TODO: Add render code for galleries -->
+            {{range .Galleries}}
+            <tr class="border">
+                <td class="p-2 border">{{.ID}}</td>
+                <td class="p-2 border">{{.Title}}</td>
+                <td class="p-2 border">
+                    <a href="/galleries/{{.ID}}">View</a>
+                    <a href="/galleries/{{.ID}}/edit">Edit</a>
+                
+                </td>
+            </tr>
+            {{end}}
         </tbody>
     </table>
 </div>
