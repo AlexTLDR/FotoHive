@@ -17,13 +17,26 @@
                 <td class="p-2 border">{{.ID}}</td>
                 <td class="p-2 border">{{.Title}}</td>
                 <td class="p-2 border">
-                    <a href="/galleries/{{.ID}}">View</a>
-                    <a href="/galleries/{{.ID}}/edit">Edit</a>
-                
+                    <a href="/galleries/{{.ID}}"
+                        class="py-1 px-2 bg-blue-100 hover:bg-blue-200
+                            border border-blue-600
+                            text-xs text-blue-600
+                            rounded">View</a>
+                    <a href="/galleries/{{.ID}}/edit"
+                         class="py-1 px-2 bg-yellow-100 hover:bg-yellow-200
+                            border border-yellow-600
+                            text-xs text-yellow-600
+                            rounded">Edit</a>               
                 </td>
             </tr>
             {{end}}
         </tbody>
     </table>
+    <div class="py-4">
+        <a href="/galleries/new" 
+            class="py-2 px-8 
+            bg-indigo-600 hover:bg-indigo-700 
+            text-white text-lg font-bold 
+            rounded" >New Gallery</a>
 </div>
 {{template "footer" .}}
