@@ -21,12 +21,15 @@
         <!-- Danger zone -->
         <div class="py-4">
             <h2>Danger zone</h2>
-            <form action="galleries/{{.ID}}/delete" method="post"
+            <form action="/galleries/{{.ID}}/delete" method="post"
                 onsubmit="return confirm('Do you really want to delete this gallery?');">
-                <div class ="hidden">
+                <div class="hidden">
                     {{csrfField}}
                 </div>
                 <button type="submit" class="py-2 px-8 bg-red-600 hover:bg-red-700 
                 text-white rounded font-bold text-lg">Delete</button>
+            </form>
+        </div>
 </div>
 {{template "footer" .}}
+
