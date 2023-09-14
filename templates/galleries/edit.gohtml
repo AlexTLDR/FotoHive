@@ -18,6 +18,16 @@
                 text-white rounded font-bold text-lg">Update</button>
             </div>
         </form>
+        <div class="py-4">
+            <h2 class="pb-2 text-sm font-semibold text-gray-800">Current Images</h2>
+            <div class="py-2 grid grid-cols-8 gap-2">
+                {{range .Images}}
+                    <div class="h-min w-full relative">
+                        <img class="w-full" src="/galleries/{{.GalleryID}}/images/{{.FilenameEscaped}}">
+                    </div>
+                {{end}}
+            </div>
+        </div>
         <!-- Danger zone -->
         <div class="py-4">
             <h2>Danger zone</h2>
