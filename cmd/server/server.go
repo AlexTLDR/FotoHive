@@ -34,10 +34,19 @@ func loadEnvConfig() (config, error) {
 	if err != nil {
 		return cfg, err
 	}
-	// TODO: PSQL
-	cfg.PSQL = models.DefaultPostgresConfig()
 
-	// TODO: SMTP
+	cfg.PSQL = models.PostgresConfig{
+		Host:     os.Getenv("PSQL_HOST"),
+		Port:     os.Getenv("PSQL_PORT"),
+		User:     os.Getenv("PSQL_USER"),
+		Password: os.Getenv("PSQL_PASSWORD"),
+		Database: os.Getenv("PSQL_DATABASE"),
+		SSLMode:  os.Getenv("PSQL_SSLMODE"),
+	}
+	if cfg.PSQL.Host == "" || cfg.PSQL.Port == "" || cfg.PSQL.User == "" || cfg.PSQL.Password == "" || cfg.PSQL.Database == "" || cfg.PSQL.SSLMode == "" {
+		return cfg, fmt.Errorf("loadEnvConfig: missing required environment variable")
+	}
+
 	cfg.SMTP.Host = os.Getenv("SMTP_HOST")
 	portString := os.Getenv("SMTP_PORT")
 	cfg.SMTP.Port, err = strconv.Atoi(portString)
@@ -46,11 +55,11 @@ func loadEnvConfig() (config, error) {
 	}
 	cfg.SMTP.Username = os.Getenv("SMTP_USERNAME")
 	cfg.SMTP.Password = os.Getenv("SMTP_PASSWORD")
-	// TODO: CSRF
-	cfg.CSRF.Key = "0An3m5VpO8cnA9LTe60RQcmmyJwhj3f5"
-	cfg.CSRF.Secure = false //TODO: change to true in production
-	// TODO: Read the server values from env variable
-	cfg.Server.Address = ":3000"
+
+	cfg.CSRF.Key = os.Getenv("CSRF_KEY")
+	cfg.CSRF.Secure = os.Getenv("CSRF_SECURE") == "true"
+
+	cfg.Server.Address = os.Getenv("SERVER_ADDRESS")
 	return cfg, nil
 
 }
