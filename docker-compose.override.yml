@@ -1,12 +1,10 @@
 version: "3.9"
 
 services:
-  # Postgres
   db:
     ports:
       - 5432:5432
 
-  # Adminer
   adminer:
     image: adminer
     restart: always
