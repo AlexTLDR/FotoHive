@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     volumes:
-      - ./images:/app/images
+      - ~/data/fotohive/images:/app/images
     depends_on:
       - db
 
@@ -20,5 +20,14 @@ services:
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - ./data/caddy:/data/caddy
+
+  db:
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_USER: ${PSQL_USER}
+      POSTGRES_PASSWORD: ${PSQL_PASSWORD}
+      POSTGRES_DB: ${PSQL_DATABASE}
+    volumes:
+      - ~/data/fotohive/psql:/var/lib/postgresql/data/pgdata
 
 
