@@ -8,10 +8,17 @@ services:
     restart: always
     volumes:
       - ./images:/app/images
-    # TODO: remove before deploying
-    ports:
-      - "3000:3000"
     depends_on:
       - db
+
+  caddy:
+    image: caddy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./data/caddy:/data/caddy
 
 
