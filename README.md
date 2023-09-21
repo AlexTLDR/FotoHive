@@ -1,3 +1,10 @@
+# Production Stuff
+
+I am still waiting on mailtrap to allow me to send emails. Waiting on them to validate the email sending domain.I need this validation for password recovery emails.
+
+https://fotohive.alextldr.com/
+
+
 # WebDev
 
 A place to hack/test WebDev stuff with Go
