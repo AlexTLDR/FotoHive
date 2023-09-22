@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	DefaultSender = "support@aiggato.com"
+	DefaultSender = "alex@alextldr.com"
 )
 
 type Email struct {

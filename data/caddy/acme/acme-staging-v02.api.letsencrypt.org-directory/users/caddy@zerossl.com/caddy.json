@@ -1,0 +1,9 @@
+{
+	"status": "valid",
+	"contact": [
+		"mailto:caddy@zerossl.com"
+	],
+	"termsOfServiceAgreed": true,
+	"orders": "",
+	"location": "https://acme-staging-v02.api.letsencrypt.org/acme/acct/119366894"
+}
