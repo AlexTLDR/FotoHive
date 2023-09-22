@@ -17,20 +17,20 @@ func FAQ(tpl Template) http.HandlerFunc {
 		Answer   template.HTML
 	}{
 		{
-			Question: "Is there a free version?",
-			Answer:   "Yes, but it's not as good as this one",
+			Question: "What's your LinkedIn?",
+			Answer:   `<a href="https://www.linkedin.com/in/alexandru-badragan/">linkedin.com/in/alexandru-badragan</a>`,
 		},
 		{
-			Question: "What are your support hours?",
-			Answer:   "Nonstop, we're here to help",
+			Question: "How can I reach you?",
+			Answer:   "Drop me an email at alex@alextldr.com",
 		},
 		{
-			Question: "How do I contact support?",
-			Answer:   `Email us - <a href="mailto:support@example.com">support@example.com</a>`,
+			Question: "Why does the frontend look so bad?",
+			Answer:   "I'm a backend developer, I don't know how to make things look good",
 		},
 		{
-			Question: "Is this how Dynamic templates work?",
-			Answer:   "Yes, this is how they work",
+			Question: "What is your github handle?",
+			Answer:   "alextldr",
 		},
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
