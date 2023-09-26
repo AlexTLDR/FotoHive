@@ -4,11 +4,10 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/joho/godotenv"
 	"golang.org/x/oauth2"
@@ -51,13 +50,16 @@ func main() {
 		log.Fatal(err)
 	}
 
-	client := conf.Client(ctx, tok)
-	resp, err := client.Post("https://api.dropboxapi.com/2/files/list_folder", "application/json", strings.NewReader(`{
-		"path": ""
-	}`))
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer resp.Body.Close()
-	io.Copy(os.Stdout, resp.Body)
+	// client := conf.Client(ctx, tok)
+	// resp, err := client.Post("https://api.dropboxapi.com/2/files/list_folder", "application/json", strings.NewReader(`{
+	// 	"path": ""
+	// }`))
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// defer resp.Body.Close()
+	// io.Copy(os.Stdout, resp.Body)
+	enc := json.NewEncoder(os.Stdout)
+	enc.SetIndent("", "  ")
+	enc.Encode(tok)
 }
