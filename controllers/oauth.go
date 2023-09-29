@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 
@@ -24,8 +26,45 @@ func (oa OAuth) Connect(w http.ResponseWriter, r *http.Request) {
 	}
 	state := csrf.Token(r)
 	setCookie(w, "oauth_state", state)
-	url := conf.AuthCodeURL(state, oauth2.SetAuthURLParam("redirect_uri", redirectURI(r, provider)))
+	url := conf.AuthCodeURL(state,
+		oauth2.SetAuthURLParam("redirect_uri",
+			redirectURI(r, provider)),
+	)
 	http.Redirect(w, r, url, http.StatusFound)
+}
+
+func (oa OAuth) Callback(w http.ResponseWriter, r *http.Request) {
+	provider := chi.URLParam(r, "provider")
+	provider = strings.ToLower(provider)
+	conf, ok := oa.ProviderConfigs[provider]
+	if !ok {
+		http.Error(w, "Unknown provider - invalid OAuth2 Service", http.StatusBadRequest)
+		return
+	}
+
+	state := r.FormValue("state")
+	cookieState, err := readCookie(r, "oauth_state")
+	if err != nil || cookieState != state {
+		if err != nil {
+			log.Println(err)
+		}
+		http.Error(w, "Invalid state parameter/ Invalid request", http.StatusBadRequest)
+		return
+	}
+	deleteCookie(w, "oauth_state")
+
+	code := r.FormValue("code")
+	token, err := conf.Exchange(r.Context(), code, oauth2.SetAuthURLParam("redirect_uri", redirectURI(r, provider)))
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Failed to exchange token", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "  ")
+	enc.Encode(token)
 }
 
 func redirectURI(r *http.Request, provider string) string {
