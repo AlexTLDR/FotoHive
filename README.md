@@ -1,6 +1,6 @@
 # Production Stuff
 
-I am still waiting on mailtrap to allow me to send emails. Waiting on them to validate the email sending domain.I need this validation for password recovery emails.
+I am currently awaiting Mailtrap to grant me permission to send emails. I'm waiting for them to verify the email sending domain. This validation is necessary for sending password recovery emails.
 
 https://fotohive.alextldr.com/
 
