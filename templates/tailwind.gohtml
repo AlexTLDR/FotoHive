@@ -81,11 +81,18 @@ function setupDropbox() {
     }
     let options = {
         success: function(files) {
-            alert("Here's the file link: " + files[0].link)
+            for(let i = 0; i < files.length; i++) {
+                var input = document.createElement("input");
+                input.type = "hidden";
+                input.name = "files";
+                input.value = files[i].link;
+                dbxForm.appendChild(input);
+            }
+            dbxForm.submit();
         },
         linkType: "direct",
         multiselect: true,
-        extensions: ['images'],
+        extensions: ["images"],
         folderselect: false,
     };
     let button = Dropbox.createChooseButton(options);
