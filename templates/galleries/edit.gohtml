@@ -21,6 +21,10 @@
         <div class="py-4">
             {{template "upload_image_form" .}}
         </div>
+        
+        <div class="py-4">
+            {{template "dropbox_image_form" .}}
+        </div>
         <div class="py-4">
             <h2 class="pb-2 text-sm font-semibold text-gray-800">Current Images</h2>
             <div class="py-2 grid grid-cols-8 gap-2">
@@ -71,6 +75,18 @@
         <input type="file" multiple accept="image/png, image/jpeg, image/gif" id="images" name="images"/>
     </div>
     <button type="submit" class="py-2 px-8 bg-indigo-600 hover:bg-indigo-700 text-white text-lg font-bold rounded">Upload</button>
+</form>
+{{end}}
+
+{{define "dropbox_image_form"}}
+<form action="/galleries/{{.ID}}/images/url"
+    method="post" enctype="multipart/form-data" id="dropbox-chooser-form">  
+    {{csrfField}}
+    <div class="py-2">
+        <p class="block mb-2 text-sm font-semibold text-gray-800">
+            Add Images via Dropbox 
+        </p>
+    </div>
 </form>
 {{end}}
 

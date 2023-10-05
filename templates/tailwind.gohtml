@@ -74,6 +74,11 @@
   data-app-key="72qrj757nq9r4i1">
 </script>
 <script>
+function setupDropbox() {
+    let dbxForm = document.getElementById("dropbox-chooser-form");
+    if(dbxForm === null) {
+        return;
+    }
     let options = {
         success: function(files) {
             alert("Here's the file link: " + files[0].link)
@@ -84,7 +89,9 @@
         folderselect: false,
     };
     let button = Dropbox.createChooseButton(options);
-    document.body.appendChild(button);
+    dbxForm.appendChild(button);
+}
+setupDropbox();
 </script>
 </body>
 </html>
