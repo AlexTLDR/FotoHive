@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"path/filepath"
 	"strconv"
+	"sync"
 
 	"github.com/AlexTLDR/WebDev/context"
 	"github.com/AlexTLDR/WebDev/errors"
@@ -236,14 +237,17 @@ func (g Galleries) ImageViaURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	files := r.PostForm["files"]
+	var wg sync.WaitGroup
+	wg.Add(len(files))
 	for _, file := range files {
-		err = g.GalleryService.CreateImageViaURL(gallery.ID, file)
-		if err != nil {
-			http.Error(w, "Something went wrong with an image: "+file, http.StatusInternalServerError)
-			return
-		}
-
+		imageFile := file
+		go func() {
+			g.GalleryService.CreateImageViaURL(gallery.ID, imageFile)
+			wg.Done()
+		}()
 	}
+	wg.Wait()
+
 	editPath := fmt.Sprintf("/galleries/%d/edit", gallery.ID)
 	http.Redirect(w, r, editPath, http.StatusFound)
 }
