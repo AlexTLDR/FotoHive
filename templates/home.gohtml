@@ -5,12 +5,16 @@
   <p>When registering a new account, I bypassed the email validation, allowing the use of any mock email address. However, to test the "Forgot password?" feature, a valid email address is necessary.</p> 
   <p>You can utilize <a href="https://10minutemail.net/" class="text-blue-600">https://10minutemail.net/</a> to generate a temporary email address for this purpose.</p>
   <br>
+  <p>Photos can be uploaded from your local machine, or via Dropbox.</p>
+  <br>
   <p>I've set a maximum file size of 10MB, and I'm also checking that files are in either the gif, jpeg, or png formats. Attempting to upload a file in a different format won't be feasible.</p>
   <br>
   <p>I'm enhancing security by encrypting passwords in the database using both hashes and salts. This means that passwords are not visible in the database.</p> 
   <p>Additionally, because of the unique salts, even if two different accounts use the same password, the hashes stored in the database will be distinct. To prevent session hijacking, I'm employing session tokens.</p>
   <br>
   <h3>For more details please check the <a href="https://github.com/AlexTLDR/WebDev" class="text-blue-600">source code</a> or drop me an <a class="text-blue-600" href="mailto:alex@alextldr.com">email</a>.</h3>
+  <br>
+  <p class="py-4 text-gray-500">TODO: Enhance error handling - substitute generic error messages with specific ones.</p>
 </div>
 {{template "footer" .}}
 
