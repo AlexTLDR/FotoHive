@@ -20,6 +20,8 @@ services:
     depends_on:
       - db
     logging: *highlight-logging
+    networks:
+      - alextldr
   # caddy:
   #   image: caddy
   #   restart: always
