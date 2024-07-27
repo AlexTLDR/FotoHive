@@ -20,16 +20,16 @@ services:
     depends_on:
       - db
     logging: *highlight-logging
-  caddy:
-    image: caddy
-    restart: always
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - ./data/caddy:/data/caddy
-    logging: *highlight-logging
+  # caddy:
+  #   image: caddy
+  #   restart: always
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./Caddyfile:/etc/caddy/Caddyfile
+  #     - ./data/caddy:/data/caddy
+  #   logging: *highlight-logging
 
   db:
     environment:
