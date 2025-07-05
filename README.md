@@ -48,3 +48,7 @@ host=localhost port=5432 user=rick password=picklerick dbname=GalacticFederation
 go install github.com/pressly/goose/v3/cmd/goose@latest
 export GOPATH=$HOME/alex/git
 export PATH=$PATH:/home/alex/go:$GOPATH/bin
+
+## Contributing
+
+If you'd like to contribute, please fork the repository and open a pull request to the `main` branch. The next focus is on improving the UI.
