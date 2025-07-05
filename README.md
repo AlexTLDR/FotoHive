@@ -1,4 +1,6 @@
-# Production Stuff
+# FotoHive
+
+## Production Stuff
 
 https://fotohive.alextldr.com/
 
@@ -19,11 +21,11 @@ I'm enhancing security by encrypting passwords in the database using both hashes
 
 Additionally, because of the unique salts, even if two different accounts use the same password, the hashes stored in the database will be distinct. To prevent session hijacking, I'm employing session tokens.
 
-# TODO
+### TODO
 
 Enhance error handling - substitute generic error messages with specific ones.
 
-# Docker & Postgres
+### Docker & Postgres
 
 $docker compose up
 
@@ -37,11 +39,11 @@ localhost:3333
 PSQL:
 docker compose exec -it db psql -U rick -d GalacticFederation
 
-# connection string for goose:
+### connection string for goose:
 
 host=localhost port=5432 user=rick password=picklerick dbname=GalacticFederation sslmode=disable
 
-# Goose install:
+### Goose install:
 
 go install github.com/pressly/goose/v3/cmd/goose@latest
 export GOPATH=$HOME/alex/git
