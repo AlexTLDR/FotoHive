@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/AlexTLDR/WebDev/controllers"
 	"github.com/AlexTLDR/WebDev/migrations"
@@ -196,7 +197,13 @@ func run(cfg config) error {
 	})
 
 	// Start the server
-
+	srv := &http.Server{
+		Addr:         cfg.Server.Address,
+		Handler:      r,
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
 	fmt.Printf("Server is running on port %s...\n", cfg.Server.Address)
-	return http.ListenAndServe(cfg.Server.Address, r)
+	return srv.ListenAndServe()
 }

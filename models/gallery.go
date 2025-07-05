@@ -145,25 +145,39 @@ func (service *GalleryService) Image(galleryID int, filename string) (Image, err
 }
 
 func (service *GalleryService) CreateImage(galleryID int, filename string, contents io.Reader) error {
+	// Sanitize and validate filename first
+	safeFilename, err := service.validateAndSanitizeFilename(filename)
+	if err != nil {
+		return fmt.Errorf("invalid filename: %w", err)
+	}
+
 	readBytes, err := checkContentType(contents, service.imageContentTypes())
 	if err != nil {
-		return fmt.Errorf("creating image %v: %w", filename, err)
+		return fmt.Errorf("creating image %v: %w", safeFilename, err)
 	}
-	err = checkExtension(filename, service.extensions())
+	err = checkExtension(safeFilename, service.extensions())
 	if err != nil {
-		return fmt.Errorf("creating image %v: %w", filename, err)
+		return fmt.Errorf("creating image %v: %w", safeFilename, err)
 	}
+
 	galleryDir := service.galleryDir(galleryID)
 	err = os.MkdirAll(galleryDir, 0755)
 	if err != nil {
 		return fmt.Errorf("creating gallery-%d directory: %w", galleryID, err)
 	}
-	imagePath := filepath.Join(galleryDir, filename)
+
+	// Create the safe image path and double-check it's within gallery directory
+	imagePath, err := service.createSafeImagePath(galleryDir, safeFilename)
+	if err != nil {
+		return fmt.Errorf("creating safe image path: %w", err)
+	}
+
 	dst, err := os.Create(imagePath)
 	if err != nil {
 		return fmt.Errorf("creating image: %w", err)
 	}
 	defer dst.Close()
+
 	completeFile := io.MultiReader(
 		bytes.NewReader(readBytes),
 		contents,
@@ -189,16 +203,24 @@ func (service *GalleryService) CreateImageViaURL(galleryID int, url string) erro
 }
 
 func (service *GalleryService) DeleteImage(galleryID int, filename string) error {
-	image, err := service.Image(galleryID, filename)
+	// Validate and sanitize filename
+	safeFilename, err := service.validateAndSanitizeFilename(filename)
+	if err != nil {
+		return fmt.Errorf("invalid filename: %w", err)
+	}
+
+	image, err := service.Image(galleryID, safeFilename)
 	if err != nil {
 		return fmt.Errorf("deleting image: %w", err)
 	}
+
 	err = os.Remove(image.Path)
 	if err != nil {
 		return fmt.Errorf("deleting image: %w", err)
 	}
 	return nil
 }
+
 func (service *GalleryService) extensions() []string {
 	return []string{".jpg", ".png", ".jpeg", ".gif"}
 }
@@ -224,4 +246,77 @@ func hasExtension(file string, extensions []string) bool {
 		}
 	}
 	return false
+}
+
+// Helper functions
+// validateAndSanitizeFilename performs comprehensive filename validation
+func (service *GalleryService) validateAndSanitizeFilename(filename string) (string, error) {
+	if filename == "" {
+		return "", fmt.Errorf("filename cannot be empty")
+	}
+
+	// Extract just the filename, removing any directory components
+	safeFilename := filepath.Base(filename)
+
+	// Additional sanitization
+	safeFilename = strings.ReplaceAll(safeFilename, "..", "")
+	safeFilename = strings.TrimSpace(safeFilename)
+
+	// Validate filename characteristics
+	if safeFilename == "" || safeFilename == "." || safeFilename == ".." {
+		return "", fmt.Errorf("invalid filename after sanitization")
+	}
+
+	// Check for hidden files (starting with dot)
+	if strings.HasPrefix(safeFilename, ".") {
+		return "", fmt.Errorf("hidden files not allowed")
+	}
+
+	// Validate length (reasonable limit)
+	if len(safeFilename) > 255 {
+		return "", fmt.Errorf("filename too long")
+	}
+
+	// Check for null bytes and other control characters
+	if strings.ContainsAny(safeFilename, "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f") {
+		return "", fmt.Errorf("filename contains invalid characters")
+	}
+
+	return safeFilename, nil
+}
+
+// createSafeImagePath creates and validates the complete image path
+func (service *GalleryService) createSafeImagePath(galleryDir, filename string) (string, error) {
+	// Ensure gallery directory is absolute
+	absGalleryDir, err := filepath.Abs(galleryDir)
+	if err != nil {
+		return "", fmt.Errorf("getting absolute gallery directory: %w", err)
+	}
+
+	// Create the target path
+	imagePath := filepath.Join(absGalleryDir, filename)
+
+	// Get absolute target path
+	absImagePath, err := filepath.Abs(imagePath)
+	if err != nil {
+		return "", fmt.Errorf("getting absolute image path: %w", err)
+	}
+
+	// Verify the target path is within the gallery directory
+	relPath, err := filepath.Rel(absGalleryDir, absImagePath)
+	if err != nil {
+		return "", fmt.Errorf("calculating relative path: %w", err)
+	}
+
+	// Check if the relative path goes outside the gallery directory
+	if strings.HasPrefix(relPath, "..") || strings.Contains(relPath, ".."+string(filepath.Separator)) {
+		return "", fmt.Errorf("path traversal attempt detected")
+	}
+
+	// Ensure the path doesn't contain any directory separators (should be just filename)
+	if strings.Contains(relPath, string(filepath.Separator)) {
+		return "", fmt.Errorf("subdirectories not allowed")
+	}
+
+	return absImagePath, nil
 }
