@@ -52,36 +52,53 @@ jobs:
                   key: ${{ secrets.SSH_PRIVATE_KEY }}
                   passphrase: ${{ secrets.SSH_PASSPHRASE }}
                   script: |
-                      # Login to GitHub Container Registry
-                      echo ${{ secrets.GITHUB_TOKEN }} | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+                  # Login to GitHub Container Registry
+                  echo ${{ secrets.GITHUB_TOKEN }} | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
 
-                      # Navigate to app directory (create if doesn't exist)
-                      mkdir -p ~/fotohive
-                      cd ~/fotohive
+                  # Navigate to app directory (create if doesn't exist)
+                  mkdir -p ~/fotohive
+                  cd ~/fotohive
 
-                      # Download docker-compose files
-                      curl -sSL https://raw.githubusercontent.com/AlexTLDR/FotoHive/main/docker-compose.yml -o docker-compose.yml
-                      curl -sSL https://raw.githubusercontent.com/AlexTLDR/FotoHive/main/docker-compose.production.yml -o docker-compose.production.yml
+                  # Download docker-compose files
+                  curl -sSL https://raw.githubusercontent.com/AlexTLDR/FotoHive/main/docker-compose.yml -o docker-compose.yml
+                  curl -sSL https://raw.githubusercontent.com/AlexTLDR/FotoHive/main/docker-compose.production.yml -o docker-compose.production.yml
 
-                      # Create override file to use pre-built image instead of building
-                      cat > docker-compose.override.yml << EOF
-                      version: "3.9"
-                      services:
-                        server:
-                          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
-                          build: null
-                          ports:
-                            - "4000:4000"
-                      EOF
+                  # Create override file to use pre-built image instead of building
+                  cat > docker-compose.override.yml << EOF
+                  version: "3.9"
+                  services:
+                    server:
+                      image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
+                      build: null
+                      ports:
+                        - "4000:4000"
+                  EOF
 
-                      # Stop existing stack
-                      docker-compose -f docker-compose.yml -f docker-compose.production.yml -f docker-compose.override.yml down || true
+                  # Stop existing stack
+                  docker-compose -f docker-compose.yml -f docker-compose.production.yml -f docker-compose.override.yml down || true
 
-                      # Pull the latest image
-                      docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
+                  # Pull the latest image
+                  docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
 
-                      # Start the stack with environment file
-                      docker-compose -f docker-compose.yml -f docker-compose.production.yml -f docker-compose.override.yml --env-file /home/alex/env_files/fotohive/.env up -d
+                  # Export environment variables from secrets
+                  export PSQL_HOST="${{ secrets.PSQL_HOST }}"
+                  export PSQL_PORT="${{ secrets.PSQL_PORT }}"
+                  export PSQL_USER="${{ secrets.PSQL_USER }}"
+                  export PSQL_PASSWORD="${{ secrets.PSQL_PASSWORD }}"
+                  export PSQL_DATABASE="${{ secrets.PSQL_DATABASE }}"
+                  export PSQL_SSLMODE="${{ secrets.PSQL_SSLMODE }}"
+                  export SMTP_HOST="${{ secrets.SMTP_HOST }}"
+                  export SMTP_PORT="${{ secrets.SMTP_PORT }}"
+                  export SMTP_USERNAME="${{ secrets.SMTP_USERNAME }}"
+                  export SMTP_PASSWORD="${{ secrets.SMTP_PASSWORD }}"
+                  export CSRF_KEY="${{ secrets.CSRF_KEY }}"
+                  export CSRF_SECURE="${{ secrets.CSRF_SECURE }}"
+                  export SERVER_ADDRESS="${{ secrets.SERVER_ADDRESS }}"
+                  export DROPBOX_APP_ID="${{ secrets.DROPBOX_APP_ID }}"
+                  export DROPBOX_APP_SECRET="${{ secrets.DROPBOX_APP_SECRET }}"
 
-                      # Clean up old images
-                      docker image prune -f
+                  # Start the stack with environment variables
+                  docker-compose -f docker-compose.yml -f docker-compose.production.yml -f docker-compose.override.yml up -d
+
+                  # Clean up old images
+                  docker image prune -f
