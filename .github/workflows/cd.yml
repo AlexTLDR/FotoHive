@@ -70,6 +70,22 @@ jobs:
                           image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
                           ports:
                             - "4000:4000"
+                          environment:
+                            - PSQL_HOST=${{ secrets.PSQL_HOST }}
+                            - PSQL_PORT=${{ secrets.PSQL_PORT }}
+                            - PSQL_USER=${{ secrets.PSQL_USER }}
+                            - PSQL_PASSWORD=${{ secrets.PSQL_PASSWORD }}
+                            - PSQL_DATABASE=${{ secrets.PSQL_DATABASE }}
+                            - PSQL_SSLMODE=${{ secrets.PSQL_SSLMODE }}
+                            - SMTP_HOST=${{ secrets.SMTP_HOST }}
+                            - SMTP_PORT=${{ secrets.SMTP_PORT }}
+                            - SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}
+                            - SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
+                            - CSRF_KEY=${{ secrets.CSRF_KEY }}
+                            - CSRF_SECURE=${{ secrets.CSRF_SECURE }}
+                            - SERVER_ADDRESS=${{ secrets.SERVER_ADDRESS }}
+                            - DROPBOX_APP_ID=${{ secrets.DROPBOX_APP_ID }}
+                            - DROPBOX_APP_SECRET=${{ secrets.DROPBOX_APP_SECRET }}
                       EOF
 
                       # Stop existing stack
@@ -78,22 +94,10 @@ jobs:
                       # Pull the latest image
                       docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
 
-                      # Export environment variables from secrets
-                      export PSQL_HOST="${{ secrets.PSQL_HOST }}"
-                      export PSQL_PORT="${{ secrets.PSQL_PORT }}"
+                      # Set environment variables for database service
                       export PSQL_USER="${{ secrets.PSQL_USER }}"
                       export PSQL_PASSWORD="${{ secrets.PSQL_PASSWORD }}"
                       export PSQL_DATABASE="${{ secrets.PSQL_DATABASE }}"
-                      export PSQL_SSLMODE="${{ secrets.PSQL_SSLMODE }}"
-                      export SMTP_HOST="${{ secrets.SMTP_HOST }}"
-                      export SMTP_PORT="${{ secrets.SMTP_PORT }}"
-                      export SMTP_USERNAME="${{ secrets.SMTP_USERNAME }}"
-                      export SMTP_PASSWORD="${{ secrets.SMTP_PASSWORD }}"
-                      export CSRF_KEY="${{ secrets.CSRF_KEY }}"
-                      export CSRF_SECURE="${{ secrets.CSRF_SECURE }}"
-                      export SERVER_ADDRESS="${{ secrets.SERVER_ADDRESS }}"
-                      export DROPBOX_APP_ID="${{ secrets.DROPBOX_APP_ID }}"
-                      export DROPBOX_APP_SECRET="${{ secrets.DROPBOX_APP_SECRET }}"
 
                       # Start the stack with environment variables
                       docker compose -f docker-compose.yml -f docker-compose.production.yml -f docker-compose.override.yml up -d
