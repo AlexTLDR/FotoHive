@@ -65,17 +65,15 @@ jobs:
 
                       # Create override file to use pre-built image instead of building
                       cat > docker-compose.override.yml << EOF
-                      version: "3.9"
                       services:
                         server:
                           image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
-                          build: null
                           ports:
                             - "4000:4000"
                       EOF
 
                       # Stop existing stack
-                      docker-compose -f docker-compose.yml -f docker-compose.production.yml -f docker-compose.override.yml down || true
+                      docker compose -f docker-compose.yml -f docker-compose.production.yml -f docker-compose.override.yml down || true
 
                       # Pull the latest image
                       docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
@@ -98,7 +96,22 @@ jobs:
                       export DROPBOX_APP_SECRET="${{ secrets.DROPBOX_APP_SECRET }}"
 
                       # Start the stack with environment variables
-                      docker-compose -f docker-compose.yml -f docker-compose.production.yml -f docker-compose.override.yml up -d
+                      docker compose -f docker-compose.yml -f docker-compose.production.yml -f docker-compose.override.yml up -d
+
+                      # Wait for containers to start
+                      sleep 10
+
+                      # Verify containers are running
+                      docker compose -f docker-compose.yml -f docker-compose.production.yml -f docker-compose.override.yml ps
+
+                      # Show logs if any container failed
+                      if ! docker compose -f docker-compose.yml -f docker-compose.production.yml -f docker-compose.override.yml ps | grep -q "Up"; then
+                        echo "Container startup failed. Showing logs:"
+                        docker compose -f docker-compose.yml -f docker-compose.production.yml -f docker-compose.override.yml logs
+                        exit 1
+                      fi
+
+                      echo "FotoHive deployment successful!"
 
                       # Clean up old images
                       docker image prune -f
