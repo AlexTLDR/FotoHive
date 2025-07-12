@@ -35,7 +35,9 @@ func loadEnvConfig() (config, error) {
 	var cfg config
 	err := godotenv.Load()
 	if err != nil {
-		return cfg, err
+		// Ignore error if .env file doesn't exist (e.g., in Docker with --env-file)
+		// Environment variables should already be available from the system
+		fmt.Printf("Warning: Could not load .env file: %v\n", err)
 	}
 
 	cfg.PSQL = models.PostgresConfig{
