@@ -1,0 +1,74 @@
+name: cd
+
+on:
+    push:
+        branches: [main]
+
+env:
+    REGISTRY: ghcr.io
+    IMAGE_NAME: alextldr/fotohive
+
+jobs:
+    build-and-deploy:
+        name: Build and Deploy
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: write
+
+        steps:
+            - name: Check out code
+              uses: actions/checkout@v4
+
+            - name: Log in to Container Registry
+              uses: docker/login-action@v3
+              with:
+                  registry: ${{ env.REGISTRY }}
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Extract metadata
+              id: meta
+              uses: docker/metadata-action@v5
+              with:
+                  images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+                  tags: |
+                      type=ref,event=branch
+                      type=sha,prefix=sha-
+
+            - name: Build and push Docker image
+              uses: docker/build-push-action@v5
+              with:
+                  context: .
+                  push: true
+                  tags: ${{ steps.meta.outputs.tags }}
+                  labels: ${{ steps.meta.outputs.labels }}
+
+            - name: Deploy to Hetzner VM
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: 188.245.181.254
+                  username: alex
+                  key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  passphrase: ${{ secrets.SSH_PASSPHRASE }}
+                  script: |
+                      # Login to GitHub Container Registry
+                      echo ${{ secrets.GITHUB_TOKEN }} | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+
+                      # Pull the latest image
+                      docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
+
+                      # Stop and remove existing container if it exists
+                      docker stop fotohive || true
+                      docker rm fotohive || true
+
+                      # Run the new container
+                      docker run -d \
+                          --name fotohive \
+                          --restart unless-stopped \
+                          -p 4000:4000 \
+                          --env-file /home/alex/env_files/fotohive/.env \
+                          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
+
+                      # Clean up old images
+                      docker image prune -f
