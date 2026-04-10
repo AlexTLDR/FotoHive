@@ -10,19 +10,15 @@ env:
 
 jobs:
   build-and-deploy:
-    runs-on: self-hosted
-    container:
-      image: docker:git
-    env:
-      DOCKER_HOST: tcp://localhost:2375
+    runs-on: docker
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Login to Forgejo registry
         run: |
-          echo "${{ secrets.FORGEJO_TOKEN }}" | docker login ${{ env.REGISTRY }} \
-            -u ${{ github.actor }} --password-stdin
+          echo "${{ secrets.FORGEJO_TOKEN }}" | \
+            docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
 
       - name: Build and push
         run: |
@@ -31,13 +27,6 @@ jobs:
             -t ${{ env.REGISTRY }}/${{ env.IMAGE }}:sha-${{ github.sha }} .
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE }}:main
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE }}:sha-${{ github.sha }}
-
-      - name: Install kubectl
-        run: |
-          apk add --no-cache curl
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s \
-            https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x kubectl && mv kubectl /usr/local/bin/kubectl
 
       - name: Deploy to K3s
         run: |
