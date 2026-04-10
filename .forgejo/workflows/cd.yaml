@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY: git.alextldr.com
-  IMAGE: alextldr/fotohive
+  IMAGE: AlexTLDR/fotohive
 
 jobs:
   build-and-deploy:
@@ -29,7 +29,7 @@ jobs:
       - name: Login to Forgejo registry
         run: |
           echo "${{ secrets.FORGEJO_TOKEN }}" | \
-            docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+            docker login ${{ env.REGISTRY }} -u AlexTLDR --password-stdin
 
       # replaces: docker/metadata-action@v5 + docker/build-push-action@v5
       - name: Build and push
