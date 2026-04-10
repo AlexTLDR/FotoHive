@@ -1,3 +1,4 @@
+# I have commented out what I replaced from my cd.yaml for GitHub Actions
 name: cd
 
 on:
@@ -10,20 +11,27 @@ env:
 
 jobs:
   build-and-deploy:
+    name: Build and Deploy
     runs-on: docker
     container:
-      image: docker:git        
+      image: docker:git
     env:
-      DOCKER_HOST: tcp://localhost:2375  
+      DOCKER_HOST: tcp://localhost:2375
     steps:
+      # replaces: actions/checkout@v4
       - name: Checkout
-        uses: actions/checkout@v4
+        run: |
+          git clone --depth 1 \
+            http://x-token-auth:${{ secrets.FORGEJO_TOKEN }}@forgejo-http.forgejo.svc.cluster.local:3000/${{ github.repository }}.git \
+            ${{ github.workspace }}
 
+      # replaces: docker/login-action@v3
       - name: Login to Forgejo registry
         run: |
           echo "${{ secrets.FORGEJO_TOKEN }}" | \
             docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
 
+      # replaces: docker/metadata-action@v5 + docker/build-push-action@v5
       - name: Build and push
         run: |
           docker build \
@@ -32,15 +40,13 @@ jobs:
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE }}:main
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE }}:sha-${{ github.sha }}
 
-      - name: Install kubectl
+      # replaces: appleboy/ssh-action (SSH to Hetzner VM → kubectl to K3s)
+      - name: Deploy to K3s
         run: |
           apk add --no-cache curl
           curl -LO "https://dl.k8s.io/release/$(curl -Ls \
             https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
           chmod +x kubectl && mv kubectl /usr/local/bin/kubectl
-
-      - name: Deploy to K3s
-        run: |
           kubectl set image deployment/fotohive \
             fotohive=${{ env.REGISTRY }}/${{ env.IMAGE }}:sha-${{ github.sha }} \
             -n fotohive
