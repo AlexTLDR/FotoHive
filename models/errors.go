@@ -10,6 +10,7 @@ import (
 var (
 	ErrEmailTaken = errors.New("models: email already taken")
 	ErrNotFound   = errors.New("models: resource not found")
+	ErrNSFW       = errors.New("image contains explicit content")
 )
 
 type FileError struct {

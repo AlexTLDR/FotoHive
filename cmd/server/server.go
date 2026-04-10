@@ -26,7 +26,8 @@ type config struct {
 		Secure bool
 	}
 	Server struct {
-		Address string
+		Address    string
+		NudeNetURL string
 	}
 	OAuthProviders map[string]*oauth2.Config
 }
@@ -65,6 +66,7 @@ func loadEnvConfig() (config, error) {
 	cfg.CSRF.Secure = os.Getenv("CSRF_SECURE") == "true"
 
 	cfg.Server.Address = os.Getenv("SERVER_ADDRESS")
+	cfg.Server.NudeNetURL = os.Getenv("NUDENET_URL")
 	cfg.OAuthProviders = make(map[string]*oauth2.Config)
 	dbxConfig := &oauth2.Config{
 		ClientID:     os.Getenv("DROPBOX_APP_ID"),
@@ -113,8 +115,13 @@ func run(cfg config) error {
 	pwResetService := &models.PasswordResetService{
 		DB: db,
 	}
+	var nudeNet *models.NudeNetClient
+	if cfg.Server.NudeNetURL != "" {
+		nudeNet = &models.NudeNetClient{BaseURL: cfg.Server.NudeNetURL}
+	}
 	galleryService := &models.GalleryService{
-		DB: db,
+		DB:      db,
+		NudeNet: nudeNet,
 	}
 	emailService := models.NewEmailService(cfg.SMTP)
 

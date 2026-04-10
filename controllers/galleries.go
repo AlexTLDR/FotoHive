@@ -218,6 +218,11 @@ func (g Galleries) UploadImage(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, msg, http.StatusBadRequest)
 				return
 			}
+			if errors.Is(err, models.ErrNSFW) {
+				msg := fmt.Sprintf("%s was rejected by content moderation.", fileHeader.Filename)
+				http.Error(w, msg, http.StatusBadRequest)
+				return
+			}
 			http.Error(w, "Something went wrong", http.StatusInternalServerError)
 			return
 		}

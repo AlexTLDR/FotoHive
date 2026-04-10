@@ -99,3 +99,6 @@ $RECYCLE.BIN/
 
 # Node stuff
 node_modules/
+
+### JetBrains IDEs ###
+.idea/

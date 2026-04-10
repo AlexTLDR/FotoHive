@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path"
@@ -29,6 +30,9 @@ type GalleryService struct {
 	DB *sql.DB
 	// used to tell the GalleryService where to store/locate images. If not set, defaults to "images/"
 	ImagesDir string
+	// NudeNet is optional. When non-nil, uploaded images are checked for explicit content.
+	// If nil, moderation is skipped (useful for local dev without the cluster).
+	NudeNet *NudeNetClient
 }
 
 func (service *GalleryService) Create(title string, userID int) (*Gallery, error) {
@@ -185,6 +189,20 @@ func (service *GalleryService) CreateImage(galleryID int, filename string, conte
 	_, err = io.Copy(dst, completeFile)
 	if err != nil {
 		return fmt.Errorf("copying to image: %w", err)
+	}
+
+	// Content moderation — runs after the file is written to disk.
+	if service.NudeNet != nil {
+		nsfw, err := service.NudeNet.IsNSFW(imagePath)
+		if err != nil {
+			// Log but don't block the upload if NudeNet is unreachable.
+			log.Printf("nudenet check failed for %s: %v", imagePath, err)
+		} else if nsfw {
+			if removeErr := os.Remove(imagePath); removeErr != nil {
+				log.Printf("nudenet: failed to remove nsfw image %s: %v", imagePath, removeErr)
+			}
+			return ErrNSFW
+		}
 	}
 	return nil
 }
